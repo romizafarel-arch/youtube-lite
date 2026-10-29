@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -146,9 +147,17 @@ public class MainActivity extends AppCompatActivity {
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
 
-        // Keep default mobile Chrome User-Agent for native responsive layout
-        String defaultUa = settings.getUserAgentString();
-        settings.setUserAgentString(defaultUa.replace("; wv", "")); // Remove WebView marker
+        // Enable cookies & cross-site auth cookies for Google Sign-In
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setAcceptThirdPartyCookies(webView, true);
+
+        // Disguise WebView as standard Chrome Mobile (Bypasses Google's "disallowed_useragent" block)
+        String rawUa = settings.getUserAgentString();
+        String cleanUa = rawUa
+            .replace("; wv", "")
+            .replaceAll("Version/\\d+\\.\\d+\\s*", "");
+        settings.setUserAgentString(cleanUa);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
