@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube AdShield",
+  "version": "2.0.0",
+  "description": "Brave-style JSON-prune YouTube Ad Shield",
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "css": ["style.css"],
+      "run_at": "document_start"
+    }
+  ]
+}

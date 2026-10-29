@@ -1,0 +1,16 @@
+# Gradle / Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.iml
+.idea/
+
+# Windows Desktop build
+bin/*.exe
+bin/*.dll
+crash.txt
+
+# OS / Editor
+.DS_Store
+Thumbs.db

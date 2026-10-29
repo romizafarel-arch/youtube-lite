@@ -1,0 +1,309 @@
+/* YouTube AdShield + Obsidian "Feel Alive" Editorial Theme */
+
+/* ==========================================================================
+   1. CORE AD & CLUTTER DEFUSER (Zero Ads)
+   ========================================================================== */
+#masthead-ad,
+ytd-ad-slot-renderer,
+ytd-banner-promo-renderer,
+ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+ytd-rich-section-renderer:has(ytd-ad-slot-renderer),
+ytd-rich-item-renderer:has(#ad-badge),
+ytd-rich-item-renderer:has(.badge-shape-wiz--thumbnail-badge),
+ytd-rich-item-renderer:has([aria-label*="Bersponsor"]),
+ytd-rich-item-renderer:has([aria-label*="Sponsored"]),
+#player-ads,
+#companion,
+ytd-companion-slot-renderer,
+ytd-action-companion-ad-renderer,
+ytd-promoted-sparkles-web-renderer,
+ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
+.ytp-ad-module,
+.ytp-ad-overlay-container,
+.ytp-ad-message-container,
+ytd-in-feed-ad-layout-renderer,
+tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
+ytd-popup-container:has(ytd-enforcement-message-view-model),
+tp-yt-iron-overlay-backdrop {
+  display: none !important;
+}
+
+/* ==========================================================================
+   2. SHORTS CLUTTER REMOVAL (Clean Feed, Keep Sidebar)
+   ========================================================================== */
+/* Hide Shorts carousel from Home, Search, and Recommendation Feeds */
+ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+ytd-reel-shelf-renderer,
+ytd-rich-shelf-renderer[is-shorts] {
+  display: none !important;
+}
+
+/* ==========================================================================
+   3. OBSIDIAN OLED PALETTE (#08080a - Pure Deep Dark)
+   ========================================================================== */
+:root, html, html[dark], [dark] {
+  --yt-spec-base-background: #08080a !important;
+  --yt-spec-raised-background: #0e1017 !important;
+  --yt-spec-menu-background: #12131a !important;
+  --yt-spec-inverted-background: #f3f4f6 !important;
+  --yt-spec-general-background-a: #08080a !important;
+  --yt-spec-general-background-b: #08080a !important;
+  --yt-spec-text-primary: #f3f4f6 !important;
+  --yt-spec-text-secondary: #9ca3af !important;
+  --yt-spec-text-disabled: #6b7280 !important;
+  --yt-spec-icon-active-other: #f3f4f6 !important;
+  --yt-spec-icon-inactive: #9ca3af !important;
+  --yt-spec-icon-disabled: #4b5563 !important;
+  --yt-spec-badge-chip-background: #141520 !important;
+  --yt-spec-button-chip-background-hover: #1e202e !important;
+  --ytd-searchbox-background: #12131a !important;
+  --ytd-searchbox-text-color: #f3f4f6 !important;
+}
+
+html,
+html[dark],
+[dark],
+body,
+ytd-app,
+#page-manager,
+#content,
+ytd-masthead,
+#masthead,
+#background.ytd-masthead {
+  background-color: #08080a !important;
+  background: #08080a !important;
+}
+
+/* Search bar & Masthead */
+#container.ytd-searchbox,
+form.ytd-searchbox,
+ytd-searchbox[desktop-search-redesign] #container.ytd-searchbox {
+  background-color: #12131a !important;
+  border: 1px solid #222533 !important;
+  box-shadow: none !important;
+  border-radius: 9999px !important;
+}
+#container.ytd-searchbox input,
+#search-input input,
+input#search {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #f3f4f6 !important;
+}
+#container.ytd-searchbox input::placeholder,
+input#search::placeholder {
+  color: #6b7280 !important;
+}
+#search-icon-legacy.ytd-searchbox,
+ytd-searchbox[desktop-search-redesign] #search-icon-legacy.ytd-searchbox {
+  background-color: #161824 !important;
+  border: 1px solid #222533 !important;
+  border-left: none !important;
+  border-radius: 0 9999px 9999px 0 !important;
+}
+#search-icon-legacy.ytd-searchbox yt-icon,
+#search-icon-legacy.ytd-searchbox yt-icon svg {
+  color: #9ca3af !important;
+  fill: #9ca3af !important;
+}
+#voice-search-button.ytd-masthead yt-icon-button,
+#voice-search-button.ytd-masthead button {
+  background-color: #141620 !important;
+  border-radius: 50% !important;
+}
+#voice-search-button.ytd-masthead yt-icon {
+  color: #f3f4f6 !important;
+  fill: #f3f4f6 !important;
+}
+
+/* Category Filter Chips Bar */
+#chips-wrapper.ytd-feed-filter-chip-bar-renderer,
+ytd-feed-filter-chip-bar-renderer {
+  background-color: #08080a !important;
+}
+yt-chip-cloud-chip-renderer[chip-style="STYLE_DEFAULT"],
+yt-chip-cloud-chip-renderer {
+  background-color: #141520 !important;
+  border: 1px solid #202332 !important;
+  color: #d1d5db !important;
+  border-radius: 9999px !important;
+}
+yt-chip-cloud-chip-renderer yt-formatted-string {
+  color: #d1d5db !important;
+}
+yt-chip-cloud-chip-renderer:hover {
+  background-color: #1d2030 !important;
+}
+yt-chip-cloud-chip-renderer:hover yt-formatted-string {
+  color: #ffffff !important;
+}
+yt-chip-cloud-chip-renderer[selected] {
+  background-color: #e11d48 !important;
+  color: #ffffff !important;
+  border-color: #e11d48 !important;
+}
+yt-chip-cloud-chip-renderer[selected] yt-formatted-string {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Sidebar Navigation */
+#guide-content.ytd-app,
+ytd-guide-renderer,
+#guide-inner-content.ytd-app {
+  background-color: #08080a !important;
+  border-right: 1px solid #161822 !important;
+}
+ytd-guide-entry-renderer yt-formatted-string,
+#guide-section-title.ytd-guide-section-renderer,
+ytd-guide-entry-renderer yt-icon,
+.guide-entry-badge.ytd-guide-entry-renderer {
+  color: #9ca3af !important;
+  fill: #9ca3af !important;
+}
+ytd-guide-entry-renderer[active] yt-formatted-string,
+ytd-guide-entry-renderer:hover yt-formatted-string {
+  color: #ffffff !important;
+}
+ytd-guide-entry-renderer[active] yt-icon,
+ytd-guide-entry-renderer:hover yt-icon {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+ytd-guide-entry-renderer:hover,
+tp-yt-paper-item:hover {
+  background-color: #141620 !important;
+  border-radius: 8px !important;
+}
+
+/* ==========================================================================
+   4. EDITORIAL "FEEL ALIVE" TYPOGRAPHY & CARD STYLING
+   ========================================================================== */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_m07NSg.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_d0nNSg.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_TknNSg.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/plusjakartasans/v12/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_KUnNSg.ttf') format('truetype');
+}
+
+/* Video Title in Feed (Modern Lockup + Legacy) */
+#video-title,
+#video-title.ytd-rich-grid-media,
+#video-title.ytd-video-renderer,
+#video-title.ytd-compact-video-renderer,
+#video-title.ytd-grid-video-renderer,
+#video-title-link,
+ytd-rich-item-renderer h3,
+ytd-rich-item-renderer h3 a,
+ytd-rich-item-renderer h3 span,
+yt-lockup-view-model h3,
+yt-lockup-view-model h3 a,
+yt-lockup-view-model h3 span,
+.yt-lockup-metadata-view-model-wiz__heading,
+.yt-lockup-metadata-view-model-wiz__title,
+.yt-lockup-metadata-view-model-wiz__heading a,
+.yt-lockup-metadata-view-model-wiz__heading span,
+ytd-rich-grid-media h3,
+ytd-rich-grid-media h3 a,
+ytd-rich-grid-media h3 span {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em !important;
+  color: #f8fafc !important;
+  font-size: 15.5px !important;
+  line-height: 1.4 !important;
+}
+
+/* Video Title in Watch Page: Bold Modern Sans with high contrast */
+h1.ytd-watch-metadata,
+h1.ytd-watch-metadata yt-formatted-string,
+.ytd-video-primary-info-renderer h1 {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  font-size: 20px !important;
+  line-height: 1.35 !important;
+  color: #ffffff !important;
+}
+
+/* Metadata & Channel info */
+#channel-name,
+#channel-name yt-formatted-string,
+#channel-name a,
+#metadata-line,
+#metadata-line span,
+ytd-video-meta-block span,
+.yt-lockup-metadata-view-model-wiz__metadata,
+.yt-lockup-metadata-view-model-wiz__metadata span {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  letter-spacing: -0.01em !important;
+  font-size: 13px !important;
+  color: #9ca3af !important;
+  line-height: 1.35 !important;
+}
+
+/* Video Thumbnail Cards: Modern rounded 12px with subtle border */
+ytd-rich-item-renderer {
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+ytd-rich-item-renderer:hover {
+  transform: translateY(-2px) !important;
+}
+ytd-thumbnail,
+ytd-thumbnail #thumbnail,
+ytd-thumbnail img {
+  border-radius: 12px !important;
+}
+ytd-thumbnail {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+ytd-rich-item-renderer:hover ytd-thumbnail {
+  border-color: rgba(225, 29, 72, 0.6) !important;
+  box-shadow: 0 8px 24px -4px rgba(225, 29, 72, 0.25) !important;
+}
+
+/* Watch Page: Sleek Description & Container */
+ytd-watch-flexy,
+#columns.ytd-watch-flexy {
+  background-color: #060608 !important;
+}
+ytd-watch-metadata,
+#description.ytd-watch-metadata {
+  background-color: #0c0d14 !important;
+  border: 1px solid #1a1c28 !important;
+  border-radius: 14px !important;
+}
+
+/* Hide Promotional Clutter & Popups */
+ytd-banner-promo-renderer,
+#big-yoodle,
+ytd-statement-banner-renderer,
+ytd-primetime-promo-renderer,
+ytd-mealbar-promo-renderer,
+ytd-clarification-renderer {
+  display: none !important;
+}
