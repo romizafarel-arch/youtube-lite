@@ -307,3 +307,20 @@ ytd-mealbar-promo-renderer,
 ytd-clarification-renderer {
   display: none !important;
 }
+
+/* ==========================================================================
+   5. GUARANTEED SUBTITLES / CAPTIONS VISIBILITY
+   ========================================================================== */
+.ytp-caption-window-container,
+.ytp-caption-window-bottom,
+.caption-window {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 60 !important;
+}
+.ytp-caption-segment {
+  display: inline-block !important;
+  visibility: visible !important;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8) !important;
+}

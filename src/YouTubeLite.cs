@@ -76,6 +76,34 @@ namespace YouTubeLite
 
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HT_CAPTION = 0x2;
+        private const int WM_GETMINMAXINFO = 0x0024;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct POINT
+        {
+            public int x;
+            public int y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MINMAXINFO
+        {
+            public POINT ptReserved;
+            public POINT ptMaxSize;
+            public POINT ptMaxPosition;
+            public POINT ptMinTrackSize;
+            public POINT ptMaxTrackSize;
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.Style |= 0x20000; // WS_MINIMIZEBOX
+                return cp;
+            }
+        }
 
         private Panel titleBarPanel;
         private Label lblAppTitle;
@@ -293,6 +321,33 @@ namespace YouTubeLite
             const int HTBOTTOM = 15;
             const int HTBOTTOMLEFT = 16;
             const int HTBOTTOMRIGHT = 17;
+
+            if (m.Msg == WM_GETMINMAXINFO)
+            {
+                base.WndProc(ref m);
+                if (!isFullScreen)
+                {
+                    MINMAXINFO mmi = (MINMAXINFO)Marshal.PtrToStructure(m.LParam, typeof(MINMAXINFO));
+                    Screen currentScreen = Screen.FromHandle(this.Handle);
+                    Rectangle work = currentScreen.WorkingArea;
+                    Rectangle bounds = currentScreen.Bounds;
+
+                    int maxW = work.Width;
+                    int maxH = work.Height;
+                    if (work.Height == bounds.Height)
+                    {
+                        maxH = bounds.Height - 1;
+                    }
+
+                    mmi.ptMaxPosition.x = Math.Abs(work.Left - bounds.Left);
+                    mmi.ptMaxPosition.y = Math.Abs(work.Top - bounds.Top);
+                    mmi.ptMaxSize.x = maxW;
+                    mmi.ptMaxSize.y = maxH;
+
+                    Marshal.StructureToPtr(mmi, m.LParam, true);
+                }
+                return;
+            }
 
             if (m.Msg == WM_NCHITTEST)
             {
