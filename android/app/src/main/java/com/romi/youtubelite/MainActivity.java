@@ -140,47 +140,74 @@ public class MainActivity extends AppCompatActivity {
         "      height: 100% !important;" +
         "      background: #000 !important;" +
         "    }" +
+        "    ytm-app, ytm-watch, ytm-watch-flexy, #player-container, .player-container, #player, .html5-video-player, .html5-video-container {" +
+        "      background: #000 !important;" +
+        "    }" +
         "    header, #header-bar, ytm-header-bar-renderer," +
         "    ytm-pivot-bar-renderer, .pivot-bar," +
-        "    .watch-below-the-player, ytm-item-section-renderer," +
-        "    #related, #comments, .ytm-comments-entry-point-header," +
+        "    ytm-watch-metadata, ytm-single-column-watch-next-results-renderer," +
+        "    ytm-engagement-panel-section-list-renderer, ytm-item-section-renderer," +
+        "    .watch-below-the-player, #related, #comments, .ytm-comments-entry-point-header," +
+        "    ytm-custom-control, .player-control-background, .player-controls-background," +
+        "    .player-controls-top, .player-controls-bottom, .player-controls-middle," +
+        "    ytm-watch-player-controls, .icon-button.player-control-play-pause-icon," +
+        "    .fullscreen-icon, .ytm-gear-icon, .player-control-fullscreen-button," +
         "    .ytp-chrome-top, .ytp-chrome-bottom, .ytp-gradient-top, .ytp-gradient-bottom," +
         "    .ytp-cued-thumbnail-overlay, .ytp-pause-overlay," +
         "    .ytp-ce-element, .ytp-cards-teaser, .ytp-paid-content-overlay," +
         "    .ytp-bezel-text-wrapper, .ytp-spinner {" +
         "      display: none !important;" +
-        "    }" +
-        "    #player-container-id, .player-container, #player, #movie_player, .html5-video-player, .html5-video-container {" +
-        "      position: absolute !important;" +
-        "      top: 0 !important;" +
-        "      left: 0 !important;" +
-        "      width: 100% !important;" +
-        "      height: 100% !important;" +
-        "      margin: 0 !important;" +
-        "      padding: 0 !important;" +
-        "      background: transparent !important;" +
+        "      visibility: hidden !important;" +
+        "      opacity: 0 !important;" +
+        "      pointer-events: none !important;" +
         "    }" +
         "    video.video-stream, video {" +
-        "      position: absolute !important;" +
+        "      position: fixed !important;" +
         "      top: 0 !important;" +
         "      left: 0 !important;" +
-        "      width: 100% !important;" +
-        "      height: 100% !important;" +
+        "      right: 0 !important;" +
+        "      bottom: 0 !important;" +
+        "      width: 100vw !important;" +
+        "      height: 100vh !important;" +
+        "      max-width: 100vw !important;" +
+        "      max-height: 100vh !important;" +
         "      object-fit: contain !important;" +
-        "      background: transparent !important;" +
+        "      background: #000 !important;" +
+        "      z-index: 2147483640 !important;" +
+        "      margin: 0 !important;" +
+        "      padding: 0 !important;" +
+        "      transform: none !important;" +
         "    }" +
         "    .ytp-caption-window-container, .ytp-caption-window-bottom, .caption-window {" +
+        "      z-index: 2147483647 !important;" +
         "      transform: scale(0.65) !important;" +
         "      transform-origin: bottom center !important;" +
+        "      display: block !important;" +
+        "      visibility: visible !important;" +
+        "      opacity: 1 !important;" +
+        "    }" +
+        "    .ytp-caption-segment {" +
+        "      display: inline-block !important;" +
+        "      visibility: visible !important;" +
         "    }" +
         "  `;" +
         "  window.scrollTo(0, 0);" +
-        "  function fit() {" +
-        "    window.dispatchEvent(new Event('resize'));" +
+        "  function applyFix() {" +
+        "    var v = document.querySelector('video');" +
+        "    if (v) {" +
+        "      v.style.setProperty('position', 'fixed', 'important');" +
+        "      v.style.setProperty('top', '0px', 'important');" +
+        "      v.style.setProperty('left', '0px', 'important');" +
+        "      v.style.setProperty('width', '100vw', 'important');" +
+        "      v.style.setProperty('height', '100vh', 'important');" +
+        "      v.style.setProperty('object-fit', 'contain', 'important');" +
+        "      v.style.setProperty('z-index', '2147483640', 'important');" +
+        "      v.style.setProperty('transform', 'none', 'important');" +
+        "    }" +
         "  }" +
-        "  fit();" +
-        "  setTimeout(fit, 100);" +
-        "  setTimeout(fit, 300);" +
+        "  applyFix();" +
+        "  setTimeout(applyFix, 100);" +
+        "  setTimeout(applyFix, 300);" +
         "})();";
 
     private static final String MINIPLAYER_CSS_DISABLE_JS =
@@ -196,8 +223,8 @@ public class MainActivity extends AppCompatActivity {
         "      v.style.removeProperty('top');" +
         "      v.style.removeProperty('position');" +
         "      v.style.removeProperty('object-fit');" +
-        "      v.style.width = '100%';" +
-        "      v.style.height = '100%';" +
+        "      v.style.removeProperty('z-index');" +
+        "      v.style.removeProperty('transform');" +
         "    }" +
         "    var c = document.querySelector('.html5-video-container');" +
         "    if (c) {" +
@@ -206,8 +233,6 @@ public class MainActivity extends AppCompatActivity {
         "      c.style.removeProperty('position');" +
         "      c.style.removeProperty('top');" +
         "      c.style.removeProperty('left');" +
-        "      c.style.width = '100%';" +
-        "      c.style.height = '100%';" +
         "    }" +
         "    var p = document.querySelector('#movie_player') || document.querySelector('.html5-video-player');" +
         "    if (p) {" +
@@ -216,8 +241,6 @@ public class MainActivity extends AppCompatActivity {
         "      p.style.removeProperty('position');" +
         "      p.style.removeProperty('top');" +
         "      p.style.removeProperty('left');" +
-        "      p.style.width = '100%';" +
-        "      p.style.height = '100%';" +
         "    }" +
         "    window.dispatchEvent(new Event('resize'));" +
         "  }" +
@@ -514,6 +537,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playVideo(String url) {
+        // Pause any background preview video playing in feed
+        feedWebView.evaluateJavascript("(function(){ var v = document.querySelectorAll('video'); for(var i=0; i<v.length; i++) v[i].pause(); })();", null);
+
         // Normalize shorts to standard watch url for better controls
         if (url.contains("/shorts/")) {
             String id = url.substring(url.indexOf("/shorts/") + 8);
@@ -568,6 +594,7 @@ public class MainActivity extends AppCompatActivity {
         playerHeaderControls.setVisibility(View.GONE);
         miniTouchOverlay.setVisibility(View.VISIBLE);
         feedSwipeRefresh.setEnabled(feedWebView.getScrollY() == 0);
+        feedWebView.evaluateJavascript("(function(){ var v = document.querySelectorAll('video'); for(var i=0; i<v.length; i++) v[i].pause(); })();", null);
 
         playerWebView.scrollTo(0, 0);
 
