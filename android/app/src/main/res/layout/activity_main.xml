@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -20,75 +21,115 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <!-- FLOATING / COLLAPSIBLE MINI-PLAYER CONTAINER -->
-    <FrameLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/playerContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/black"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false">
 
-        <!-- Dedicated Player WebView -->
-        <WebView
-            android:id="@+id/playerWebView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/black" />
-
-        <!-- Top Header Controls (Visible in Expanded Mode) -->
-        <LinearLayout
-            android:id="@+id/playerHeaderControls"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_gravity="top"
-            android:background="#99000000"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp">
-
-            <ImageButton
-                android:id="@+id/btnMinimize"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Minimize"
-                android:src="@drawable/ic_minimize" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <ImageButton
-                android:id="@+id/btnClose"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Close"
-                android:src="@drawable/ic_close" />
-        </LinearLayout>
-
-        <!-- Touch Overlay for Minimized Mode (Tapping expands, close button closes) -->
         <FrameLayout
-            android:id="@+id/miniTouchOverlay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
+            android:layout_height="match_parent">
 
-            <ImageButton
-                android:id="@+id/btnMiniClose"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="top|end"
-                android:layout_margin="4dp"
-                android:background="#B3000000"
-                android:contentDescription="Close"
-                android:padding="6dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_close" />
+            <!-- Dedicated Player WebView -->
+            <WebView
+                android:id="@+id/playerWebView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/black" />
+
+            <!-- Top Header Controls (Visible in Expanded Mode) -->
+            <RelativeLayout
+                android:id="@+id/playerHeaderControls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:paddingTop="32dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="8dp">
+
+                <ImageButton
+                    android:id="@+id/btnMinimize"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_alignParentStart="true"
+                    android:background="@drawable/bg_circle_button"
+                    android:contentDescription="Minimize"
+                    android:padding="7dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_minimize" />
+
+                <ImageButton
+                    android:id="@+id/btnClose"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/bg_circle_button"
+                    android:contentDescription="Close"
+                    android:padding="8dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_close" />
+            </RelativeLayout>
+
+            <!-- Touch Overlay for Minimized Mode (Tapping expands, close/play controls) -->
+            <FrameLayout
+                android:id="@+id/miniTouchOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
+
+                <!-- Expand button (top start) -->
+                <ImageButton
+                    android:id="@+id/btnMiniExpand"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="6dp"
+                    android:background="@drawable/bg_circle_button"
+                    android:contentDescription="Expand"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_expand" />
+
+                <!-- Close button (top end) -->
+                <ImageButton
+                    android:id="@+id/btnMiniClose"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="6dp"
+                    android:background="@drawable/bg_circle_button"
+                    android:contentDescription="Close"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_close" />
+
+                <!-- Play/Pause Toggle button (bottom start) -->
+                <ImageButton
+                    android:id="@+id/btnMiniPlayPause"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="bottom|start"
+                    android:layout_margin="6dp"
+                    android:background="@drawable/bg_circle_button"
+                    android:contentDescription="Play/Pause"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_pause" />
+
+            </FrameLayout>
+
         </FrameLayout>
 
-    </FrameLayout>
+    </androidx.cardview.widget.CardView>
 
     <!-- Fullscreen Video Container (For landscape / WebChromeClient HTML5 fullscreen) -->
     <FrameLayout

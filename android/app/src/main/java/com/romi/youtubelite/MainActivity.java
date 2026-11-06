@@ -3,17 +3,16 @@ package com.romi.youtubelite;
 import android.annotation.SuppressLint;
 import android.app.PictureInPictureParams;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Rational;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -24,10 +23,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.io.ByteArrayInputStream;
@@ -122,33 +122,104 @@ public class MainActivity extends AppCompatActivity {
         "  }, true);" +
         "})();";
 
+    // Minimized Player Mode: isolates pure HTML5 video, hides all web clutter/buttons/comments
+    private static final String MINIPLAYER_CSS_ENABLE_JS =
+        "(function() {" +
+        "  var style = document.getElementById('yt-lite-miniplayer-style');" +
+        "  if (!style) {" +
+        "    style = document.createElement('style');" +
+        "    style.id = 'yt-lite-miniplayer-style';" +
+        "    (document.head || document.documentElement).appendChild(style);" +
+        "  }" +
+        "  style.textContent = `" +
+        "    html, body {" +
+        "      overflow: hidden !important;" +
+        "      background: #000 !important;" +
+        "      margin: 0 !important;" +
+        "      padding: 0 !important;" +
+        "      width: 100vw !important;" +
+        "      height: 100vh !important;" +
+        "    }" +
+        "    header, #header-bar, ytm-header-bar-renderer," +
+        "    ytm-pivot-bar-renderer, .pivot-bar," +
+        "    .watch-below-the-player, ytm-item-section-renderer," +
+        "    #related, #comments, .ytm-comments-entry-point-header," +
+        "    .ytp-chrome-top, .ytp-chrome-bottom, .ytp-gradient-top, .ytp-gradient-bottom," +
+        "    .ytp-cued-thumbnail-overlay, .ytp-pause-overlay," +
+        "    .ytp-ce-element, .ytp-cards-teaser, .ytp-paid-content-overlay," +
+        "    .ytp-bezel-text-wrapper, .ytp-spinner {" +
+        "      display: none !important;" +
+        "    }" +
+        "    #player-container-id, .player-container, #player, #movie_player, .html5-video-player {" +
+        "      position: fixed !important;" +
+        "      top: 0 !important;" +
+        "      left: 0 !important;" +
+        "      width: 100vw !important;" +
+        "      height: 100vh !important;" +
+        "      max-width: 100vw !important;" +
+        "      max-height: 100vh !important;" +
+        "      margin: 0 !important;" +
+        "      padding: 0 !important;" +
+        "      z-index: 999999 !important;" +
+        "      background: #000 !important;" +
+        "    }" +
+        "    video.video-stream, video {" +
+        "      position: absolute !important;" +
+        "      top: 0 !important;" +
+        "      left: 0 !important;" +
+        "      width: 100% !important;" +
+        "      height: 100% !important;" +
+        "      object-fit: contain !important;" +
+        "      transform: none !important;" +
+        "    }" +
+        "  `;" +
+        "  window.dispatchEvent(new Event('resize'));" +
+        "})();";
+
+    private static final String MINIPLAYER_CSS_DISABLE_JS =
+        "(function() {" +
+        "  var style = document.getElementById('yt-lite-miniplayer-style');" +
+        "  if (style) { style.remove(); }" +
+        "  window.dispatchEvent(new Event('resize'));" +
+        "})();";
+
     // Mini-player states
     private static final int STATE_CLOSED = 0;
     private static final int STATE_EXPANDED = 1;
     private static final int STATE_MINIMIZED = 2;
 
     private int playerState = STATE_CLOSED;
+    private float density = 1.0f;
 
     private SwipeRefreshLayout feedSwipeRefresh;
     private WebView feedWebView;
 
-    private FrameLayout playerContainer;
+    private CardView playerContainer;
     private WebView playerWebView;
-    private LinearLayout playerHeaderControls;
+    private RelativeLayout playerHeaderControls;
     private FrameLayout miniTouchOverlay;
     private ImageButton btnMinimize;
     private ImageButton btnClose;
+    private ImageButton btnMiniExpand;
     private ImageButton btnMiniClose;
+    private ImageButton btnMiniPlayPause;
 
     private FrameLayout fullscreenContainer;
     private View customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
+
+    // Gesture detection for Swipe-down to minimize
+    private float touchDownX = 0;
+    private float touchDownY = 0;
+    private boolean isTrackingSwipeDown = false;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        density = getResources().getDisplayMetrics().density;
 
         feedSwipeRefresh = findViewById(R.id.feedSwipeRefresh);
         feedWebView = findViewById(R.id.feedWebView);
@@ -159,7 +230,9 @@ public class MainActivity extends AppCompatActivity {
         miniTouchOverlay = findViewById(R.id.miniTouchOverlay);
         btnMinimize = findViewById(R.id.btnMinimize);
         btnClose = findViewById(R.id.btnClose);
+        btnMiniExpand = findViewById(R.id.btnMiniExpand);
         btnMiniClose = findViewById(R.id.btnMiniClose);
+        btnMiniPlayPause = findViewById(R.id.btnMiniPlayPause);
 
         fullscreenContainer = findViewById(R.id.fullscreenContainer);
 
@@ -258,6 +331,9 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 view.evaluateJavascript(AD_BLOCK_AND_BACKGROUND_JS, null);
+                if (playerState == STATE_MINIMIZED) {
+                    view.evaluateJavascript(MINIPLAYER_CSS_ENABLE_JS, null);
+                }
             }
         });
 
@@ -332,12 +408,51 @@ public class MainActivity extends AppCompatActivity {
         settings.setUserAgentString(cleanUa);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setupPlayerControls() {
         btnMinimize.setOnClickListener(v -> minimizePlayer());
         btnClose.setOnClickListener(v -> closePlayer());
 
-        miniTouchOverlay.setOnClickListener(v -> expandPlayer());
+        btnMiniExpand.setOnClickListener(v -> expandPlayer());
         btnMiniClose.setOnClickListener(v -> closePlayer());
+        btnMiniPlayPause.setOnClickListener(v -> togglePlayPause());
+
+        // Draggable floating miniplayer with tap-to-expand
+        miniTouchOverlay.setOnTouchListener(new View.OnTouchListener() {
+            private float startX, startY;
+            private float initialTranslationX, initialTranslationY;
+            private boolean isDrag = false;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startX = event.getRawX();
+                        startY = event.getRawY();
+                        initialTranslationX = playerContainer.getTranslationX();
+                        initialTranslationY = playerContainer.getTranslationY();
+                        isDrag = false;
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        float dx = event.getRawX() - startX;
+                        float dy = event.getRawY() - startY;
+                        if (Math.hypot(dx, dy) > 8 * density) {
+                            isDrag = true;
+                            playerContainer.setTranslationX(initialTranslationX + dx);
+                            playerContainer.setTranslationY(initialTranslationY + dy);
+                        }
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                        if (!isDrag) {
+                            expandPlayer();
+                        }
+                        return true;
+                }
+                return false;
+            }
+        });
     }
 
     public void playVideo(String url) {
@@ -355,49 +470,142 @@ public class MainActivity extends AppCompatActivity {
     public void expandPlayer() {
         playerState = STATE_EXPANDED;
         playerContainer.setVisibility(View.VISIBLE);
+        playerContainer.setTranslationX(0);
+        playerContainer.setTranslationY(0);
 
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         playerContainer.setLayoutParams(params);
-        playerContainer.setBackgroundResource(R.color.black);
-        playerContainer.setElevation(0);
+        playerContainer.setRadius(0);
+        playerContainer.setCardElevation(0);
 
         playerHeaderControls.setVisibility(View.VISIBLE);
         miniTouchOverlay.setVisibility(View.GONE);
         feedSwipeRefresh.setEnabled(false);
+
+        playerWebView.evaluateJavascript(MINIPLAYER_CSS_DISABLE_JS, null);
     }
 
     public void minimizePlayer() {
         playerState = STATE_MINIMIZED;
         playerContainer.setVisibility(View.VISIBLE);
+        playerContainer.setTranslationX(0);
+        playerContainer.setTranslationY(0);
 
-        float density = getResources().getDisplayMetrics().density;
-        int widthPx = (int) (200 * density);
-        int heightPx = (int) (112 * density);
-        int marginPx = (int) (16 * density);
-        int bottomMarginPx = (int) (24 * density);
+        int widthPx = (int) (210 * density);
+        int heightPx = (int) (118 * density); // Exact 16:9 ratio
+        int marginEndPx = (int) (12 * density);
+        int bottomMarginPx = (int) (68 * density); // High enough to avoid covering the 56dp bottom nav bar!
 
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(widthPx, heightPx);
         params.gravity = Gravity.BOTTOM | Gravity.END;
-        params.setMargins(0, 0, marginPx, bottomMarginPx);
+        params.setMargins(0, 0, marginEndPx, bottomMarginPx);
 
         playerContainer.setLayoutParams(params);
-        playerContainer.setBackgroundResource(R.drawable.bg_miniplayer);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            playerContainer.setElevation(12 * density);
-            playerContainer.setClipToOutline(true);
-        }
+        playerContainer.setRadius(12 * density);
+        playerContainer.setCardElevation(12 * density);
 
         playerHeaderControls.setVisibility(View.GONE);
         miniTouchOverlay.setVisibility(View.VISIBLE);
         feedSwipeRefresh.setEnabled(feedWebView.getScrollY() == 0);
+
+        // Inject CSS to frame pure HTML5 video cleanly without web clutter
+        playerWebView.evaluateJavascript(MINIPLAYER_CSS_ENABLE_JS, null);
+
+        updateMiniPlayPauseIcon();
     }
 
     public void closePlayer() {
         playerState = STATE_CLOSED;
+        playerWebView.evaluateJavascript(MINIPLAYER_CSS_DISABLE_JS, null);
         playerWebView.loadUrl("about:blank");
         playerContainer.setVisibility(View.GONE);
+        playerContainer.setTranslationX(0);
+        playerContainer.setTranslationY(0);
         feedSwipeRefresh.setEnabled(feedWebView.getScrollY() == 0);
+    }
+
+    private void updateMiniPlayPauseIcon() {
+        if (playerWebView == null || btnMiniPlayPause == null) return;
+        playerWebView.evaluateJavascript(
+            "(function() { var v = document.querySelector('video'); return v && !v.paused ? 'playing' : 'paused'; })();",
+            value -> {
+                if (value != null && value.contains("playing")) {
+                    btnMiniPlayPause.setImageResource(R.drawable.ic_pause);
+                } else {
+                    btnMiniPlayPause.setImageResource(R.drawable.ic_play);
+                }
+            }
+        );
+    }
+
+    private void togglePlayPause() {
+        if (playerWebView == null || btnMiniPlayPause == null) return;
+        playerWebView.evaluateJavascript(
+            "(function() {" +
+            "  var v = document.querySelector('video');" +
+            "  if (v) {" +
+            "    if (v.paused) { v.play(); return 'playing'; }" +
+            "    else { v.pause(); return 'paused'; }" +
+            "  }" +
+            "  return 'none';" +
+            "})();",
+            value -> {
+                if (value != null && value.contains("paused")) {
+                    btnMiniPlayPause.setImageResource(R.drawable.ic_play);
+                } else {
+                    btnMiniPlayPause.setImageResource(R.drawable.ic_pause);
+                }
+            }
+        );
+    }
+
+    /**
+     * Native Swipe-Down to minimize: Intercepts downward swipe from top video area in Expanded mode
+     */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (playerState == STATE_EXPANDED && customView == null) {
+            float y = ev.getRawY();
+            float x = ev.getRawX();
+
+            switch (ev.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    touchDownX = x;
+                    touchDownY = y;
+                    // Detect if touch begins in top 350dp (video area) or scroll is at top
+                    if (y <= 350 * density || (playerWebView != null && playerWebView.getScrollY() <= 5)) {
+                        isTrackingSwipeDown = true;
+                    } else {
+                        isTrackingSwipeDown = false;
+                    }
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    if (isTrackingSwipeDown) {
+                        float dy = y - touchDownY;
+                        float dx = Math.abs(x - touchDownX);
+                        // Swiped downwards by more than 90dp with vertical dominance
+                        if (dy > 90 * density && dy > dx * 1.3f) {
+                            isTrackingSwipeDown = false;
+                            minimizePlayer();
+                            // Cancel ongoing touch inside WebView to prevent stuck press/click
+                            MotionEvent cancel = MotionEvent.obtain(ev);
+                            cancel.setAction(MotionEvent.ACTION_CANCEL);
+                            super.dispatchTouchEvent(cancel);
+                            cancel.recycle();
+                            return true;
+                        }
+                    }
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    isTrackingSwipeDown = false;
+                    break;
+            }
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     private boolean isAdRequest(Uri uri) {
@@ -465,6 +673,9 @@ public class MainActivity extends AppCompatActivity {
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             playerContainer.setLayoutParams(params);
+            playerContainer.setRadius(0);
+            playerContainer.setCardElevation(0);
+            playerWebView.evaluateJavascript(MINIPLAYER_CSS_ENABLE_JS, null);
         } else {
             feedSwipeRefresh.setVisibility(View.VISIBLE);
             if (playerState == STATE_MINIMIZED) {
@@ -491,9 +702,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // 3. If in Minimized mode or Closed, navigate feed history
+        // 3. If in Minimized mode or Closed, navigate feed history first; if at root, close miniplayer
         if (feedWebView.canGoBack()) {
             feedWebView.goBack();
+        } else if (playerState == STATE_MINIMIZED) {
+            closePlayer();
         } else {
             super.onBackPressed();
         }
